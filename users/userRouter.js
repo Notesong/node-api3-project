@@ -1,22 +1,90 @@
 const express = require("express");
 
 const Users = require("./userDb.js");
+const Posts = require("../posts/postDb.js");
 
 const router = express.Router();
 
-router.post("/", validateUser, (req, res) => {});
+router.post("/", validateUser, (req, res) => {
+  Users.insert(req.body)
+    .then(user => {
+      res.status(201).json(user);
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
+});
 
-router.post("/:id/posts", validateUserId, validatePost, (req, res) => {});
+router.post("/:id/posts", validateUserId, validatePost, (req, res) => {
+  const post = req.body;
+  post.user_id = req.params.id;
 
-router.get("/", (req, res) => {});
+  Posts.insert(post)
+    .then(newPost => {
+      res.status(201).json(newPost);
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
+});
 
-router.get("/:id", validateUserId, (req, res) => {});
+router.get("/", (req, res) => {
+  Users.get()
+    .then(users => {
+      res.status(200).json(users);
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
+});
 
-router.get("/:id/posts", validateUserId, (req, res) => {});
+router.get("/:id", validateUserId, (req, res) => {
+  Users.getById(req.params.id)
+    .then(user => {
+      res.status(200).json(user);
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
+});
 
-router.delete("/:id", validateUserId, (req, res) => {});
+router.get("/:id/posts", validateUserId, (req, res) => {
+  Users.getUserPosts(req.params.id)
+    .then(posts => {
+      res.status(200).json(posts);
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
+});
 
-router.put("/:id", validateUserId, (req, res) => {});
+router.delete("/:id", validateUserId, (req, res) => {
+  Users.remove(req.params.id)
+    .then(response => {
+      res
+        .status(200)
+        .json({ message: `User ${req.params.id} successfully deleted.` });
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
+});
+
+router.put("/:id", validateUserId, (req, res) => {
+  Users.update(req.params.id, req.body)
+    .then(response => {
+      Users.getById(req.params.id)
+        .then(editedUser => {
+          res.status(200).json(editedUser);
+        })
+        .catch(err => {
+          res.status(500).json(err);
+        });
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
+});
 
 //custom middleware
 
@@ -31,7 +99,7 @@ function validateUserId(req, res, next) {
       }
     })
     .catch(err => {
-      res.status(500).json({ message: "Internal server error:", err });
+      res.status(500).json(err);
     });
 }
 

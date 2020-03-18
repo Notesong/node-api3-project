@@ -95,7 +95,7 @@ function validateUserId(req, res, next) {
         req.user = user;
         next();
       } else {
-        res.status(404).json({ message: "Invalid user id." });
+        res.status(404).json({ error: `ID ${req.params.id} not found.` });
       }
     })
     .catch(err => {
@@ -104,20 +104,20 @@ function validateUserId(req, res, next) {
 }
 
 function validateUser(req, res, next) {
-  if (req.body === undefined || req.body === {}) {
-    res.status(400).json({ message: "Missing user data." });
+  if (Object.keys(req.body).length === 0) {
+    res.status(400).json({ error: "Request missing user data." });
   } else if (req.body.name === undefined) {
-    res.status(400).json({ message: "Missing required name field." });
+    res.status(400).json({ error: "Request missing required field: name" });
   } else {
     next();
   }
 }
 
 function validatePost(req, res, next) {
-  if (req.body === undefined || req.body === {}) {
-    res.status(400).json({ message: "Missing user data." });
+  if (Object.keys(req.body).length === 0) {
+    res.status(400).json({ error: "Request missing post data." });
   } else if (req.body.text === undefined) {
-    res.status(400).json({ message: "Missing required text field" });
+    res.status(400).json({ error: "Request missing required field: text" });
   } else {
     next();
   }
